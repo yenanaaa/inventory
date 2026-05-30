@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>서촌 현금·계좌 기록</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#fafaf9;--sf:#fff;--sf2:#f4f3f0;
+  --bd:rgba(0,0,0,.10);--bd2:rgba(0,0,0,.18);
+  --tx:#1a1917;--tx2:#6b6a67;--tx3:#a09e9a;
+  --acc:#1a1917;--r:10px;--rl:14px;
+  --bc:#7F77DD;
+}
+@media(prefers-color-scheme:dark){:root{
+  --bg:#111110;--sf:#1c1c1a;--sf2:#242422;
+  --bd:rgba(255,255,255,.10);--bd2:rgba(255,255,255,.18);
+  --tx:#f0ede8;--tx2:#a09e9a;--tx3:#6b6a67;--acc:#f0ede8;
+}}
+body{background:var(--bg);color:var(--tx);min-height:100vh;font-family:-apple-system,'Apple SD Gothic Neo',sans-serif;}
+.wrap{max-width:640px;margin:0 auto;padding:20px 16px 80px;}
+button{cursor:pointer;font-family:inherit;}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:var(--r);border:1px solid var(--bd2);background:var(--sf);color:var(--tx);font-size:13px;font-weight:500;}
+.btn:hover{background:var(--sf2);}
+.btn.pri{background:var(--acc);color:var(--bg);border-color:transparent;}
+.btn.pri:hover{opacity:.85;}
+.ib{width:26px;height:26px;border-radius:var(--r);border:1px solid var(--bd);background:transparent;display:inline-flex;align-items:center;justify-content:center;color:var(--tx2);font-size:13px;}
+.ib:hover{background:var(--sf2);color:var(--tx);}
+header{display:flex;align-items:center;gap:10px;margin-bottom:18px;flex-wrap:wrap;}
+.logo{font-size:18px;font-weight:600;display:flex;align-items:center;gap:8px;margin-right:auto;}
+.logo-badge{padding:3px 10px;border-radius:20px;font-size:12px;font-weight:500;background:#EEEDFE;color:#3C3489;}
+.vtabs{display:flex;gap:4px;background:var(--sf2);border-radius:var(--rl);padding:4px;border:1px solid var(--bd);width:fit-content;margin-bottom:14px;}
+.vtab{padding:6px 14px;border-radius:9px;font-size:12px;font-weight:500;border:none;background:transparent;color:var(--tx2);display:flex;align-items:center;gap:4px;}
+.vtab.on{background:var(--sf);color:var(--tx);box-shadow:0 1px 3px rgba(0,0,0,.07);}
+.card{background:var(--sf);border:1px solid var(--bd);border-radius:var(--rl);padding:1.25rem;margin-bottom:1rem;}
+.ctitle{font-size:13px;font-weight:600;color:var(--tx2);margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+.fi{width:100%;font-size:13px;padding:7px 10px;border-radius:var(--r);border:1px solid var(--bd2);background:var(--sf);color:var(--tx);}
+.fl{font-size:12px;color:var(--tx2);display:block;margin-bottom:4px;margin-top:10px;}
+.fl:first-child{margin-top:0;}
+.r2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;}
+.stat{background:var(--sf2);border-radius:var(--r);padding:12px 14px;}
+.stat-l{font-size:11px;color:var(--tx2);margin-bottom:3px;}
+.stat-v{font-size:20px;font-weight:600;line-height:1.1;color:var(--tx);}
+.stat-s{font-size:11px;color:var(--tx3);margin-top:2px;}
+.pty-tabs{display:flex;gap:6px;margin-bottom:14px;}
+.pty{padding:6px 16px;border-radius:var(--r);border:1px solid var(--bd);font-size:13px;font-weight:500;background:var(--sf);color:var(--tx2);}
+.pty.on.cash{background:#EAF3DE;color:#27500A;border-color:#97C459;}
+.pty.on.xfer{background:#E6F1FB;color:#0C447C;border-color:#85B7EB;}
+.elist{display:flex;flex-direction:column;}
+.erow{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--bd);}
+.erow:last-child{border-bottom:none;}
+.edot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.ename{font-size:13px;font-weight:500;color:var(--tx);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.emeta{font-size:11px;color:var(--tx3);}
+.eamt{font-size:13px;font-weight:600;color:var(--tx);flex-shrink:0;}
+.etime{font-size:11px;color:var(--tx2);flex-shrink:0;font-family:monospace;}
+.total-bar{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;border-top:1px solid var(--bd);margin-top:6px;padding-top:10px;}
+.total-cell{text-align:center;padding:6px 0;}
+.total-cell+.total-cell{border-left:1px solid var(--bd);}
+.total-label{font-size:11px;color:var(--tx2);margin-bottom:3px;}
+.total-val{font-size:15px;font-weight:600;}
+.day-block{margin-bottom:10px;}
+.day-hd{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:var(--sf2);border-radius:var(--r);cursor:pointer;}
+.day-hd:hover{background:var(--sf);border:1px solid var(--bd);}
+.day-body{border:1px solid var(--bd);border-radius:var(--r);padding:0 12px;margin-top:5px;}
+.sumrow{display:flex;gap:14px;padding:8px 12px;background:var(--sf2);border-radius:var(--r);margin-top:5px;font-size:12px;color:var(--tx2);flex-wrap:wrap;}
+.sumrow strong{color:var(--tx);}
+.setup{background:#FAEEDA;border:1px solid #EF9F27;border-radius:var(--rl);padding:12px 16px;margin-bottom:14px;font-size:13px;color:#633806;line-height:1.7;}
+.setup code{background:rgba(0,0,0,.08);padding:2px 5px;border-radius:4px;font-family:monospace;}
+.empty{padding:2rem;text-align:center;color:var(--tx2);font-size:13px;}
+.spinner{width:16px;height:16px;border:2px solid var(--bd2);border-top-color:var(--tx);border-radius:50%;animation:spin .7s linear infinite;display:inline-block;vertical-align:middle;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(60px);padding:10px 20px;border-radius:var(--r);font-size:13px;font-weight:500;transition:transform .25s;z-index:300;white-space:nowrap;border:1px solid;pointer-events:none;}
+.toast.show{transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="logo">
+    <i class="ti ti-cash"></i>
+    서촌
+    <span class="logo-badge">현금·계좌 기록</span>
+  </div>
+  <input type="date" id="gDate" class="fi" style="width:148px;" onchange="onDateChange()">
+  <button class="btn" onclick="refreshData()"><i class="ti ti-refresh"></i></button>
+</header>
+
+<div class="setup" id="setupBanner" style="display:none">
+  <strong>⚙️ 설정 필요</strong> — <code>SCRIPT_URL</code>에 Apps Script 웹앱 URL을 입력하세요.
+</div>
+
+<div class="vtabs">
+  <button class="vtab on" onclick="switchView('add',this)"><i class="ti ti-plus"></i> 입력</button>
+  <button class="vtab" onclick="switchView('history',this)"><i class="ti ti-history"></i> 내역</button>
+</div>
+
+<div id="view-add">
+  <div class="stat-grid" id="todayStats"></div>
+  <div class="card">
+    <div class="ctitle"><i class="ti ti-plus"></i> 결제 추가</div>
+    <div class="pty-tabs">
+      <button class="pty cash on" id="pty0" onclick="selectPty(0)"><i class="ti ti-cash" style="font-size:14px;margin-right:3px"></i>현금</button>
+      <button class="pty" id="pty1" onclick="selectPty(1)"><i class="ti ti-building-bank" style="font-size:14px;margin-right:3px"></i>계좌이체</button>
+    </div>
+    <div class="r2">
+      <div><label class="fl">제품명</label><input type="text" id="addName" class="fi" placeholder="제품명 입력"></div>
+      <div><label class="fl">금액</label><input type="number" id="addAmt" class="fi" placeholder="0" min="0" oninput="calcTotal()"></div>
+    </div>
+    <div class="r2" style="margin-top:10px;">
+      <div><label class="fl">수량</label><input type="number" id="addQty" class="fi" value="1" min="1" oninput="calcTotal()"></div>
+      <div><label class="fl">소계</label><div id="addTotal" style="padding:7px 10px;border-radius:var(--r);background:var(--sf2);font-size:13px;font-weight:600;color:var(--tx);">0원</div></div>
+    </div>
+    <label class="fl">메모 (선택)</label>
+    <input type="text" id="addMemo" class="fi" placeholder="비고...">
+    <button class="btn pri" style="margin-top:12px;width:100%;justify-content:center;" onclick="addEntry()">
+      <i class="ti ti-plus"></i> 추가
+    </button>
+  </div>
+  <div class="card">
+    <div class="ctitle"><i class="ti ti-list"></i> 오늘 내역</div>
+    <div id="todayList"><div class="empty" style="padding:1rem;">아직 입력된 내역이 없어요.</div></div>
+  </div>
+</div>
+
+<div id="view-history" style="display:none">
+  <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap;">
+    <input type="date" id="filterFrom" class="fi" style="width:140px;">
+    <span style="color:var(--tx2)">—</span>
+    <input type="date" id="filterTo" class="fi" style="width:140px;">
+    <button class="btn" onclick="loadHistory()"><i class="ti ti-search"></i> 조회</button>
+    <button class="btn" onclick="resetFilter()"><i class="ti ti-refresh"></i> 이번 달</button>
+  </div>
+  <div class="stat-grid" id="histStats"></div>
+  <div id="histList"><div class="empty">기간을 설정하고 조회하세요.</div></div>
+</div>
+
+<div class="toast" id="toast"></div>
+</div>
+
+<script>
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyYd3LN3R46bYxBGvmErYkcylx7-R8MsRW0v9G5btL3iwK58y0s4iZ8iZmJwXNB1Q6c0A/exec';
+const BRANCH     = '서촌';
+const BC         = '#7F77DD';
+const isDemo     = SCRIPT_URL === 'YOUR_SCRIPT_URL_HERE';
+
+let curPty=0, curView='add';
+let localEntries=[];
+
+function init(){
+  const today=new Date().toISOString().split('T')[0];
+  document.getElementById('gDate').value=today;
+  setFilterDefault();
+  if(isDemo) document.getElementById('setupBanner').style.display='block';
+  refreshData();
+}
+function onDateChange(){ renderTodayStats(); renderTodayList(); }
+function setFilterDefault(){
+  const n=new Date(),y=n.getFullYear(),m=String(n.getMonth()+1).padStart(2,'0');
+  document.getElementById('filterFrom').value=`${y}-${m}-01`;
+  document.getElementById('filterTo').value=n.toISOString().split('T')[0];
+}
+function resetFilter(){ setFilterDefault(); loadHistory(); }
+function switchView(v,btn){
+  curView=v;
+  document.getElementById('view-add').style.display=v==='add'?'block':'none';
+  document.getElementById('view-history').style.display=v==='history'?'block':'none';
+  document.querySelectorAll('.vtab').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  if(v==='history') loadHistory();
+}
+function selectPty(idx){
+  curPty=idx;
+  document.getElementById('pty0').className='pty'+(idx===0?' cash on':'');
+  document.getElementById('pty1').className='pty'+(idx===1?' xfer on':'');
+}
+function calcTotal(){
+  const a=parseInt(document.getElementById('addAmt').value)||0;
+  const q=parseInt(document.getElementById('addQty').value)||1;
+  document.getElementById('addTotal').textContent=(a*q).toLocaleString()+'원';
+}
+function getDate(){ return document.getElementById('gDate').value; }
+function todayE(){ return localEntries.filter(e=>e.date===getDate()); }
+
+async function api(body){
+  if(isDemo){ toast('데모 모드 — URL 설정 후 실제 저장됩니다','warn'); return null; }
+  try{ const r=await fetch(SCRIPT_URL,{method:'POST',body:JSON.stringify(body)}); return await r.json(); }
+  catch(e){ toast('서버 연결 실패','err'); return null; }
+}
+async function apiGet(p){
+  if(isDemo) return null;
+  try{ const r=await fetch(SCRIPT_URL+'?'+new URLSearchParams({...p,t:Date.now()})); return await r.json(); }
+  catch(e){ toast('서버 연결 실패','err'); return null; }
+}
+
+async function refreshData(){
+  if(isDemo){ renderTodayStats(); renderTodayList(); return; }
+  const res=await apiGet({action:'getAll',branch:BRANCH});
+  if(res&&res.ok) localEntries=res.entries||[];
+  renderTodayStats(); renderTodayList();
+}
+
+async function addEntry(){
+  const name=document.getElementById('addName').value.trim();
+  const amt=parseInt(document.getElementById('addAmt').value)||0;
+  const qty=parseInt(document.getElementById('addQty').value)||1;
+  const memo=document.getElementById('addMemo').value.trim();
+  if(!name){ toast('제품명을 입력하세요.','warn'); return; }
+  if(amt<=0){ toast('금액을 입력하세요.','warn'); return; }
+  const time=new Date().toTimeString().slice(0,5);
+  const entry={id:Date.now(),branch:BRANCH,date:getDate(),type:curPty===0?'cash':'transfer',name,amt,qty,total:amt*qty,memo,time};
+  localEntries.push(entry);
+  renderTodayStats(); renderTodayList();
+  document.getElementById('addName').value='';
+  document.getElementById('addAmt').value='';
+  document.getElementById('addQty').value='1';
+  document.getElementById('addMemo').value='';
+  document.getElementById('addTotal').textContent='0원';
+  toast('추가됐습니다 ✓','success');
+  const res=await api({action:'addEntry',...entry});
+  if(res&&res.newId){ const i=localEntries.findIndex(e=>e.id===entry.id); if(i>=0) localEntries[i].id=res.newId; }
+}
+
+async function deleteEntry(id){
+  if(!confirm('삭제할까요?')) return;
+  localEntries=localEntries.filter(e=>e.id!=id);
+  renderTodayStats(); renderTodayList();
+  toast('삭제됐습니다','info');
+  await api({action:'deleteEntry',id});
+}
+
+function renderTodayStats(){
+  const e=todayE();
+  const cash=e.filter(x=>x.type==='cash').reduce((s,x)=>s+Number(x.total),0);
+  const xfer=e.filter(x=>x.type==='transfer').reduce((s,x)=>s+Number(x.total),0);
+  document.getElementById('todayStats').innerHTML=`
+    <div class="stat" style="border-top:2px solid ${BC}">
+      <div class="stat-l">총 매출</div>
+      <div class="stat-v">${(cash+xfer).toLocaleString()}원</div>
+      <div class="stat-s">${e.length}건</div>
+    </div>
+    <div class="stat" style="border-top:2px solid #1D9E75">
+      <div class="stat-l">현금</div>
+      <div class="stat-v" style="color:#085041">${cash.toLocaleString()}원</div>
+      <div class="stat-s">${e.filter(x=>x.type==='cash').length}건</div>
+    </div>
+    <div class="stat" style="border-top:2px solid #185FA5">
+      <div class="stat-l">계좌이체</div>
+      <div class="stat-v" style="color:#0C447C">${xfer.toLocaleString()}원</div>
+      <div class="stat-s">${e.filter(x=>x.type==='transfer').length}건</div>
+    </div>`;
+}
+
+function renderTodayList(){
+  const entries=todayE().slice().reverse();
+  const el=document.getElementById('todayList');
+  if(!entries.length){ el.innerHTML='<div class="empty" style="padding:1rem;">아직 입력된 내역이 없어요.</div>'; return; }
+  const cash=entries.filter(e=>e.type==='cash').reduce((s,e)=>s+Number(e.total),0);
+  const xfer=entries.filter(e=>e.type==='transfer').reduce((s,e)=>s+Number(e.total),0);
+  el.innerHTML=`<div class="elist">${entries.map(e=>`
+    <div class="erow">
+      <div class="edot" style="background:${e.type==='cash'?'#1D9E75':'#378ADD'}"></div>
+      <div style="flex:1;min-width:0;">
+        <div class="ename">${e.name}${Number(e.qty)>1?` <span style="font-size:11px;color:var(--tx2)">×${e.qty}</span>`:''}</div>
+        <div class="emeta">${e.type==='cash'?'현금':'계좌이체'}${e.memo?' · '+e.memo:''}</div>
+      </div>
+      <div class="eamt">${Number(e.total).toLocaleString()}원</div>
+      <div class="etime">${e.time||''}</div>
+      <button class="ib" onclick="deleteEntry(${e.id})" aria-label="삭제"><i class="ti ti-trash"></i></button>
+    </div>`).join('')}</div>
+    <div class="total-bar">
+      <div class="total-cell"><div class="total-label">현금 합계</div><div class="total-val" style="color:#085041">${cash.toLocaleString()}원</div></div>
+      <div class="total-cell"><div class="total-label">계좌이체 합계</div><div class="total-val" style="color:#0C447C">${xfer.toLocaleString()}원</div></div>
+      <div class="total-cell"><div class="total-label">전체 합계</div><div class="total-val">${(cash+xfer).toLocaleString()}원</div></div>
+    </div>`;
+}
+
+async function loadHistory(){
+  const from=document.getElementById('filterFrom').value;
+  const to=document.getElementById('filterTo').value;
+  const el=document.getElementById('histList');
+  el.innerHTML='<div style="padding:2rem;text-align:center;color:var(--tx2)"><span class="spinner"></span> 불러오는 중...</div>';
+  let entries;
+  if(isDemo){ entries=localEntries.filter(e=>e.date>=from&&e.date<=to); }
+  else{
+    const res=await apiGet({action:'getAll',branch:BRANCH,from,to});
+    if(!res||!res.ok){ el.innerHTML='<div class="empty">불러오기 실패</div>'; return; }
+    entries=res.entries||[];
+    localEntries=[...localEntries.filter(e=>!entries.find(x=>x.id==e.id)),...entries];
+    renderTodayStats(); renderTodayList();
+  }
+  const cashT=entries.filter(e=>e.type==='cash').reduce((s,e)=>s+Number(e.total),0);
+  const xferT=entries.filter(e=>e.type==='transfer').reduce((s,e)=>s+Number(e.total),0);
+  document.getElementById('histStats').innerHTML=`
+    <div class="stat"><div class="stat-l">기간 현금</div><div class="stat-v" style="color:#085041">${cashT.toLocaleString()}원</div><div class="stat-s">${entries.filter(e=>e.type==='cash').length}건</div></div>
+    <div class="stat"><div class="stat-l">기간 계좌이체</div><div class="stat-v" style="color:#0C447C">${xferT.toLocaleString()}원</div><div class="stat-s">${entries.filter(e=>e.type==='transfer').length}건</div></div>
+    <div class="stat"><div class="stat-l">합계</div><div class="stat-v">${(cashT+xferT).toLocaleString()}원</div><div class="stat-s">${entries.length}건</div></div>`;
+  const grouped={};
+  entries.forEach(e=>{ if(!grouped[e.date]) grouped[e.date]=[]; grouped[e.date].push(e); });
+  const dates=Object.keys(grouped).sort((a,b)=>b.localeCompare(a));
+  if(!dates.length){ el.innerHTML='<div class="empty">해당 기간에 내역이 없습니다.</div>'; return; }
+  el.innerHTML=dates.map(date=>{
+    const de=grouped[date];
+    const dc=de.filter(e=>e.type==='cash').reduce((s,e)=>s+Number(e.total),0);
+    const dt=de.filter(e=>e.type==='transfer').reduce((s,e)=>s+Number(e.total),0);
+    const id='d'+date.replace(/-/g,'');
+    return `<div class="day-block">
+      <div class="day-hd" onclick="tog('${id}')">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:13px;font-weight:600">${date}</span>
+          <span style="font-size:11px;color:var(--tx2)">${de.length}건</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:11px;color:#085041">현금 ${dc.toLocaleString()}원</span>
+          <span style="font-size:11px;color:#0C447C">계좌 ${dt.toLocaleString()}원</span>
+          <i class="ti ti-chevron-down" style="font-size:14px;color:var(--tx2)"></i>
+        </div>
+      </div>
+      <div id="${id}" style="display:none">
+        <div class="day-body">${de.slice().reverse().map(e=>`
+          <div class="erow">
+            <div class="edot" style="background:${e.type==='cash'?'#1D9E75':'#378ADD'}"></div>
+            <div style="flex:1;min-width:0;">
+              <div class="ename">${e.name}${Number(e.qty)>1?` ×${e.qty}`:''}</div>
+              <div class="emeta">${e.type==='cash'?'현금':'계좌이체'}${e.memo?' · '+e.memo:''}</div>
+            </div>
+            <div class="eamt">${Number(e.total).toLocaleString()}원</div>
+            <div class="etime">${e.time||''}</div>
+          </div>`).join('')}
+        </div>
+        <div class="sumrow">
+          <span>현금 <strong style="color:#085041">${dc.toLocaleString()}원</strong></span>
+          <span>계좌이체 <strong style="color:#0C447C">${dt.toLocaleString()}원</strong></span>
+          <span>합계 <strong>${(dc+dt).toLocaleString()}원</strong></span>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function tog(id){ const el=document.getElementById(id); el.style.display=el.style.display==='none'?'block':'none'; }
+
+let _tt=null;
+function toast(msg,type){
+  const el=document.getElementById('toast');
+  const map={success:['#EAF3DE','#27500A','#97C459'],warn:['#FAEEDA','#633806','#EF9F27'],err:['#FCEBEB','#791F1F','#F09595'],info:['#E6F1FB','#0C447C','#85B7EB']};
+  const[bg,c,bd]=map[type]||map.info;
+  el.style.cssText+=`background:${bg};color:${c};border-color:${bd};`;
+  el.textContent=msg; el.classList.add('show');
+  if(_tt) clearTimeout(_tt);
+  _tt=setTimeout(()=>el.classList.remove('show'),2800);
+}
+init();
+</script>
+</body>
+</html>
