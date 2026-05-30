@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>서촌 현금·계좌 기록</title>
+<title>레드 현금·계좌 기록</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -12,7 +12,7 @@
   --bd:rgba(0,0,0,.10);--bd2:rgba(0,0,0,.18);
   --tx:#1a1917;--tx2:#6b6a67;--tx3:#a09e9a;
   --acc:#1a1917;--r:10px;--rl:14px;
-  --bc:#7F77DD;
+  --bc:#D85A30;
 }
 @media(prefers-color-scheme:dark){:root{
   --bg:#111110;--sf:#1c1c1a;--sf2:#242422;
@@ -30,7 +30,7 @@ button{cursor:pointer;font-family:inherit;}
 .ib:hover{background:var(--sf2);color:var(--tx);}
 header{display:flex;align-items:center;gap:10px;margin-bottom:18px;flex-wrap:wrap;}
 .logo{font-size:18px;font-weight:600;display:flex;align-items:center;gap:8px;margin-right:auto;}
-.logo-badge{padding:3px 10px;border-radius:20px;font-size:12px;font-weight:500;background:#EEEDFE;color:#3C3489;}
+.logo-badge{padding:3px 10px;border-radius:20px;font-size:12px;font-weight:500;background:#FAECE7;color:#712B13;}
 .vtabs{display:flex;gap:4px;background:var(--sf2);border-radius:var(--rl);padding:4px;border:1px solid var(--bd);width:fit-content;margin-bottom:14px;}
 .vtab{padding:6px 14px;border-radius:9px;font-size:12px;font-weight:500;border:none;background:transparent;color:var(--tx2);display:flex;align-items:center;gap:4px;}
 .vtab.on{background:var(--sf);color:var(--tx);box-shadow:0 1px 3px rgba(0,0,0,.07);}
@@ -83,7 +83,7 @@ header{display:flex;align-items:center;gap:10px;margin-bottom:18px;flex-wrap:wra
 <header>
   <div class="logo">
     <i class="ti ti-cash"></i>
-    서촌
+    레드
     <span class="logo-badge">현금·계좌 기록</span>
   </div>
   <input type="date" id="gDate" class="fi" style="width:148px;" onchange="onDateChange()">
@@ -144,8 +144,8 @@ header{display:flex;align-items:center;gap:10px;margin-bottom:18px;flex-wrap:wra
 
 <script>
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzEwWpprxWwXrI4lm5TS_7jWbjFfTxEC-u7PpM5b8un81y6bX8oPDA3dbpTBnOY68CCAw/exec';
-const BRANCH     = '서촌';
-const BC         = '#7F77DD';
+const BRANCH     = '레드';
+const BC         = '#D85A30';
 const isDemo     = SCRIPT_URL === 'YOUR_SCRIPT_URL_HERE';
 
 let curPty=0, curView='add';
