@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>재고 관리 — 서촌 / 블랙 / 레드 / 작업실</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#fafaf9;--surface:#ffffff;--surface2:#f4f3f0;
+  --border:rgba(0,0,0,0.10);--border2:rgba(0,0,0,0.18);
+  --text:#1a1917;--text2:#6b6a67;--text3:#a09e9a;
+  --accent:#1a1917;--r:10px;--rl:14px;
+  --c0:#7F77DD;--c1:#2C2C2A;--c2:#D85A30;--c3:#1D9E75;
+}
+@media(prefers-color-scheme:dark){:root{
+  --bg:#111110;--surface:#1c1c1a;--surface2:#242422;
+  --border:rgba(255,255,255,0.10);--border2:rgba(255,255,255,0.18);
+  --text:#f0ede8;--text2:#a09e9a;--text3:#6b6a67;--accent:#f0ede8;
+}}
+body{background:var(--bg);color:var(--text);min-height:100vh;font-family:-apple-system,'Apple SD Gothic Neo',sans-serif;}
+.wrap{max-width:1020px;margin:0 auto;padding:20px 16px 80px;}
+
+/* 헤더 */
+header{display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap;}
+.logo{font-size:19px;font-weight:600;display:flex;align-items:center;gap:8px;margin-right:auto;}
+.hactions{display:flex;gap:8px;flex-wrap:wrap;}
+
+/* 버튼 */
+button{cursor:pointer;font-family:inherit;}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:var(--r);border:1px solid var(--border2);background:var(--surface);color:var(--text);font-size:13px;font-weight:500;transition:background .15s;}
+.btn:hover{background:var(--surface2);}
+.btn.primary{background:var(--accent);color:var(--bg);border-color:transparent;}
+.btn.primary:hover{opacity:.85;}
+.ib{width:26px;height:26px;border-radius:var(--r);border:1px solid var(--border);background:transparent;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text2);font-size:13px;transition:background .15s;}
+.ib:hover{background:var(--surface2);color:var(--text);}
+
+/* 탭 */
+.tabs{display:flex;gap:4px;background:var(--surface2);border-radius:var(--rl);padding:4px;width:fit-content;margin-bottom:18px;}
+.tab{padding:6px 16px;border-radius:9px;border:none;background:transparent;font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;display:flex;align-items:center;gap:5px;}
+.tab.active{background:var(--surface);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.08);}
+
+/* 요약 카드 */
+.summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-bottom:18px;}
+.sc{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:14px 16px;border-top:3px solid var(--bc);}
+.sc-name{font-size:12px;font-weight:500;color:var(--text2);margin-bottom:6px;display:flex;align-items:center;gap:5px;}
+.sc-dot{width:8px;height:8px;border-radius:50%;background:var(--bc);}
+.sc-num{font-size:26px;font-weight:600;line-height:1;}
+.sc-sub{font-size:11px;color:var(--text3);margin-top:4px;}
+
+/* 툴바 */
+.toolbar{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center;}
+.sw{position:relative;}
+.sw i{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:15px;pointer-events:none;}
+.sw input{padding:7px 12px 7px 32px;border:1px solid var(--border2);border-radius:var(--r);background:var(--surface);color:var(--text);font-size:13px;width:220px;}
+select{padding:7px 10px;border:1px solid var(--border2);border-radius:var(--r);background:var(--surface);color:var(--text);font-size:13px;}
+
+/* 테이블 */
+.twrap{border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;}
+.thead{display:grid;grid-template-columns:2.2fr repeat(4,1fr) 80px;background:var(--surface2);border-bottom:1px solid var(--border);}
+.th{padding:10px 14px;font-size:11px;font-weight:600;color:var(--text2);letter-spacing:.04em;text-transform:uppercase;}
+.th.bc{text-align:center;border-left:3px solid var(--bcolor);}
+.prow{display:grid;grid-template-columns:2.2fr repeat(4,1fr) 80px;border-top:1px solid var(--border);background:var(--surface);transition:background .12s;}
+.prow:hover{background:var(--surface2);}
+.td{padding:9px 14px;display:flex;align-items:center;border-right:1px solid var(--border);}
+.td:last-child{border-right:none;}
+.td.c{justify-content:center;}
+.pinfo{display:flex;align-items:center;gap:10px;min-width:0;}
+.pthumb{width:38px;height:38px;border-radius:var(--r);border:1px solid var(--border);background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;overflow:hidden;cursor:pointer;position:relative;}
+.pthumb img{width:100%;height:100%;object-fit:cover;}
+.pthumb:hover .ov{opacity:1;}
+.ov{position:absolute;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .15s;border-radius:var(--r);}
+.ov i{color:#fff;font-size:14px;}
+.pname{font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pmeta{font-size:10px;color:var(--text3);margin-top:2px;font-family:monospace;}
+.pcat{font-size:10px;color:var(--text2);}
+.scell{display:flex;flex-direction:column;align-items:center;gap:3px;}
+.snum{font-size:14px;font-weight:500;padding:2px 8px;border-radius:5px;cursor:pointer;min-width:34px;text-align:center;}
+.snum:hover{background:rgba(56,138,221,.12);color:#185FA5;}
+.snum-in{border:none;outline:none;width:46px;text-align:center;font-size:14px;font-weight:500;font-family:inherit;background:transparent;color:var(--text);}
+.sbar{width:34px;height:3px;background:var(--border);border-radius:2px;overflow:hidden;}
+.sbar-f{height:100%;border-radius:2px;transition:width .3s;}
+.low-b{font-size:9px;font-weight:600;padding:1px 5px;border-radius:3px;background:#FCEBEB;color:#791F1F;}
+.actcell{display:flex;gap:3px;justify-content:center;}
+
+/* 페이지네이션 */
+.pagi{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;background:var(--surface2);border-top:1px solid var(--border);font-size:12px;color:var(--text2);}
+.pagi-btns{display:flex;gap:4px;}
+.pbtn{padding:3px 10px;border-radius:var(--r);border:1px solid var(--border);background:var(--surface);color:var(--text2);font-size:12px;cursor:pointer;}
+.pbtn:hover{background:var(--surface2);}
+.pbtn.on{background:var(--accent);color:var(--bg);border-color:transparent;}
+
+/* 패널 */
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:1.5rem;max-width:500px;}
+.fl{font-size:12px;color:var(--text2);display:block;margin-bottom:4px;margin-top:12px;}
+.fl:first-child{margin-top:0;}
+.fi{width:100%;font-size:13px;padding:7px 10px;border-radius:var(--r);border:1px solid var(--border2);background:var(--surface);color:var(--text);}
+.from-to{display:flex;align-items:flex-end;gap:8px;margin-top:12px;}
+.from-to>div{flex:1;}
+.arr{font-size:18px;color:var(--text2);padding-bottom:8px;flex-shrink:0;}
+.prev-txt{font-size:12px;color:var(--text2);margin-top:6px;min-height:18px;}
+.prev-txt.err{color:#E24B4A;}
+.rprev{margin-top:10px;padding:10px 14px;border-radius:var(--r);background:#EAF3DE;border:1px solid #97C459;font-size:12px;color:#27500A;display:none;}
+.rprev.show{display:block;}
+
+/* 이력 */
+.log-item{display:flex;gap:10px;padding:10px 14px;border:1px solid var(--border);border-radius:var(--r);background:var(--surface);margin-bottom:6px;font-size:13px;}
+.log-ic{flex-shrink:0;width:28px;height:28px;border-radius:var(--r);display:flex;align-items:center;justify-content:center;font-size:14px;}
+.log-ic.receive{background:#EAF3DE;color:#27500A;}
+.log-ic.transfer{background:#E6F1FB;color:#0C447C;}
+.log-ic.edit{background:#F1EFE8;color:#444441;}
+.log-body{flex:1;color:var(--text2);line-height:1.5;}
+.log-body strong{color:var(--text);}
+.log-time{font-size:10px;color:var(--text3);margin-top:3px;font-family:monospace;}
+
+/* 모달 */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:200;padding:16px;}
+.modal{background:var(--surface);border:1px solid var(--border2);border-radius:var(--rl);padding:24px;width:380px;max-width:100%;max-height:90vh;overflow-y:auto;}
+.modal h3{font-size:16px;font-weight:600;margin-bottom:4px;}
+.msub{font-size:13px;color:var(--text2);margin-bottom:14px;}
+.mrow{display:flex;gap:8px;margin-top:16px;}
+.mrow button{flex:1;}
+.sec-btn{padding:7px;border-radius:var(--r);border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:13px;font-weight:500;cursor:pointer;}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:4px;}
+.g4 label{font-size:11px;font-weight:600;display:block;margin-bottom:2px;}
+.g4 input{width:100%;font-size:13px;padding:5px 4px;border:1px solid var(--border2);border-radius:7px;background:var(--surface);color:var(--text);text-align:center;}
+
+/* 이미지 업로드 */
+.img-tabs{display:flex;border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:10px;}
+.img-tab{flex:1;padding:6px;font-size:12px;font-weight:500;border:none;background:transparent;cursor:pointer;color:var(--text2);}
+.img-tab.active{background:var(--surface2);color:var(--text);}
+.dropzone{border:1px dashed var(--border2);border-radius:var(--rl);overflow:hidden;cursor:pointer;position:relative;background:var(--surface2);margin-top:4px;}
+.dropzone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.dz-ph{display:flex;flex-direction:column;align-items:center;gap:6px;padding:22px;color:var(--text2);font-size:12px;text-align:center;}
+.dz-ph i{font-size:26px;}
+.dz-pw{position:relative;}
+.dz-pw img{width:100%;max-height:160px;object-fit:contain;display:block;background:var(--surface2);}
+.dz-pw .rm{position:absolute;top:8px;right:8px;width:24px;height:24px;border-radius:50%;background:rgba(0,0,0,.55);border:none;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;}
+
+/* 알림 */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(60px);padding:10px 20px;border-radius:var(--r);font-size:13px;font-weight:500;transition:transform .25s;z-index:300;white-space:nowrap;border:1px solid;pointer-events:none;}
+.toast.show{transform:translateX(-50%) translateY(0);}
+
+/* 스피너 */
+.spinner{width:18px;height:18px;border:2px solid var(--border2);border-top-color:var(--text);border-radius:50%;animation:spin .7s linear infinite;display:inline-block;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.loading{display:flex;align-items:center;justify-content:center;gap:10px;padding:3rem;color:var(--text2);font-size:14px;}
+.empty{padding:2.5rem;text-align:center;color:var(--text2);font-size:13px;}
+
+/* 설정 배너 */
+.setup{background:#FAEEDA;border:1px solid #EF9F27;border-radius:var(--rl);padding:14px 18px;margin-bottom:18px;font-size:13px;color:#633806;line-height:1.7;}
+.setup code{background:rgba(0,0,0,0.08);padding:2px 6px;border-radius:4px;font-family:monospace;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="logo"><i class="ti ti-building-store"></i> 재고 관리</div>
+  <div class="hactions">
+    <button class="btn" onclick="loadData()"><i class="ti ti-refresh"></i> 새로고침</button>
+    <button class="btn primary" onclick="openAddModal()"><i class="ti ti-plus"></i> 상품 추가</button>
+  </div>
+</header>
+
+<div class="setup" id="setupBanner" style="display:none">
+  <strong>⚙️ 설정 필요</strong> — 이 파일 상단의 <code>SCRIPT_URL</code> 변수에 Apps Script 웹앱 URL을 입력하세요.<br>
+  Apps Script → 배포 → 웹 앱 → URL 복사 → 아래 코드에 붙여넣기
+</div>
+
+<div class="summary" id="summaryCards"></div>
+
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('stock',this)"><i class="ti ti-layout-grid"></i> 재고 현황</button>
+  <button class="tab" onclick="switchTab('receive',this)"><i class="ti ti-package-import"></i> 입고</button>
+  <button class="tab" onclick="switchTab('transfer',this)"><i class="ti ti-transfer"></i> 이동</button>
+  <button class="tab" onclick="switchTab('log',this)"><i class="ti ti-clock"></i> 이력</button>
+</div>
+
+<!-- 재고 현황 -->
+<div id="tab-stock">
+  <div class="toolbar">
+    <div class="sw">
+      <i class="ti ti-search"></i>
+      <input id="searchInput" placeholder="상품명 / SKU / 바코드..." oninput="goPage(1);renderStock()">
+    </div>
+    <select id="catFilter" onchange="goPage(1);renderStock()">
+      <option value="">전체 카테고리</option>
+      <option>Diary</option><option>Note</option><option>Bag</option>
+      <option>Masking Tape</option><option>Leather Goods</option>
+      <option>Paper Goods</option><option>Other Goods</option>
+    </select>
+  </div>
+  <div class="twrap">
+    <div class="thead">
+      <div class="th">상품</div>
+      <div class="th bc" style="--bcolor:var(--c0)">서촌</div>
+      <div class="th bc" style="--bcolor:var(--c1)">블랙</div>
+      <div class="th bc" style="--bcolor:var(--c2)">레드</div>
+      <div class="th bc" style="--bcolor:var(--c3)">작업실</div>
+      <div class="th" style="text-align:center">액션</div>
+    </div>
+    <div id="productList"><div class="loading"><div class="spinner"></div> 불러오는 중...</div></div>
+    <div class="pagi" id="pagiBar" style="display:none"></div>
+  </div>
+</div>
+
+<!-- 입고 -->
+<div id="tab-receive" style="display:none">
+  <div class="panel">
+    <p style="font-size:13px;color:var(--text2);margin-bottom:1rem;">입고 수량이 해당 지점 재고에 더해집니다.</p>
+    <label class="fl">상품 선택</label>
+    <select id="rProduct" class="fi" onchange="updateRPrev()"></select>
+    <label class="fl">입고 지점</label>
+    <select id="rBranch" class="fi" onchange="updateRPrev()">
+      <option value="0">서촌</option><option value="1">블랙</option>
+      <option value="2">레드</option><option value="3">작업실</option>
+    </select>
+    <label class="fl">입고 수량</label>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <input type="number" id="rQty" min="1" value="10" class="fi" style="width:120px;" oninput="updateRPrev()">
+      <span id="rCur" style="font-size:12px;color:var(--text2);"></span>
+    </div>
+    <div class="rprev" id="rPrev"><div id="rPrevBody"></div></div>
+    <label class="fl">납품처 / 메모 (선택)</label>
+    <input type="text" id="rMemo" class="fi" placeholder="예: 본사 창고 발주, 정기 발주...">
+    <button class="btn primary" style="margin-top:14px;width:100%;justify-content:center;" onclick="processReceive()">
+      <i class="ti ti-package-import"></i> 입고 처리
+    </button>
+  </div>
+</div>
+
+<!-- 이동 -->
+<div id="tab-transfer" style="display:none">
+  <div class="panel">
+    <p style="font-size:13px;color:var(--text2);margin-bottom:1rem;">지점 간 재고를 이동합니다.</p>
+    <label class="fl">상품 선택</label>
+    <select id="tProduct" class="fi" onchange="updateTPrev()"></select>
+    <div class="from-to">
+      <div>
+        <label class="fl" style="margin-top:0">출발 지점</label>
+        <select id="tFrom" class="fi" onchange="updateTPrev()">
+          <option value="0">서촌</option><option value="1">블랙</option>
+          <option value="2">레드</option><option value="3">작업실</option>
+        </select>
+      </div>
+      <i class="ti ti-arrow-right arr"></i>
+      <div>
+        <label class="fl" style="margin-top:0">도착 지점</label>
+        <select id="tTo" class="fi" onchange="updateTPrev()">
+          <option value="1">블랙</option><option value="0">서촌</option>
+          <option value="2">레드</option><option value="3">작업실</option>
+        </select>
+      </div>
+    </div>
+    <label class="fl">이동 수량</label>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <input type="number" id="tQty" min="1" value="1" class="fi" style="width:120px;" oninput="updateTPrev()">
+      <span class="prev-txt" id="tPrev"></span>
+    </div>
+    <label class="fl">메모 (선택)</label>
+    <input type="text" id="tMemo" class="fi" placeholder="이동 사유...">
+    <button class="btn primary" style="margin-top:14px;width:100%;justify-content:center;" onclick="processTransfer()">
+      <i class="ti ti-transfer"></i> 이동 처리
+    </button>
+  </div>
+</div>
+
+<!-- 이력 -->
+<div id="tab-log" style="display:none">
+  <div id="logList"><div class="empty">이력이 없습니다.</div></div>
+</div>
+
+<div id="modalContainer"></div>
+<div class="toast" id="toast"></div>
+
+</div><!-- /wrap -->
+
+<script>
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ★ Apps Script 웹앱 URL을 여기에 붙여넣으세요 ★
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const SCRIPT_URL = 'const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzgZfcQUIEuDhEfR8O-ggGktXZbanobu0z0cAk1CK7ioqWsOKTMGvyT5e6HiLBoB48Q6g/exec';
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+const BRANCHES = ['서촌','블랙','레드','작업실'];
+const BC       = ['var(--c0)','var(--c1)','var(--c2)','var(--c3)'];
+const BC_HEX   = ['#7F77DD','#2C2C2A','#D85A30','#1D9E75'];
+const CATS     = ['Diary','Note','Bag','Masking Tape','Leather Goods','Paper Goods','Other Goods'];
+const CAT_EMOJI= {Diary:'📅',Note:'📓',Bag:'👜','Masking Tape':'🎀','Leather Goods':'🧳','Paper Goods':'📄','Other Goods':'📦'};
+const PAGE_SIZE = 30;
+
+let products = [];
+let logs     = [];
+let curPage  = 1;
+let curTab   = 'stock';
+let isDemo   = false;
+
+// ── 데이터 로드 ──────────────────────────────────────────
+async function loadData() {
+  if (SCRIPT_URL === 'YOUR_SCRIPT_URL_HERE') {
+    document.getElementById('setupBanner').style.display = 'block';
+    isDemo = true;
+    loadDemoData();
+    return;
+  }
+  document.getElementById('productList').innerHTML = '<div class="loading"><div class="spinner"></div> 불러오는 중...</div>';
+  try {
+    const res  = await fetch(SCRIPT_URL + '?action=getAll');
+    const data = await res.json();
+    if (data.ok) {
+      products = data.products;
+      renderAll();
+      toast('데이터를 불러왔습니다 ✓', 'success');
+    } else {
+      showError(data.error);
+    }
+  } catch(e) {
+    isDemo = true;
+    loadDemoData();
+    toast('서버 연결 실패 — 데모 모드로 실행됩니다', 'warn');
+  }
+}
+
+function loadDemoData() {
+  // 253개 상품 기본 데이터 (재고 0으로 초기화)
+  const raw = [
+    [1,"1y diary solid · Citron","Diary","OnNqUMQN","2995358325671",16000,"📅"],
+    [2,"1y diary solid · Vivid Pink","Diary","fNpbjpDr","3152302377208",16000,"📅"],
+    [3,"1y diary solid · Flame","Diary","TPgoyuJn","8050156978476",16000,"📅"],
+    [4,"1y diary solid · Mint","Diary","xHY4MLlK","7926200988149",16000,"📅"],
+    [5,"1y diary solid · Red","Diary","n1Xag0Hb","9717668844595",16000,"📅"],
+    [6,"1y diary classic · Cyan","Diary","mgyse13D","4616648182900",16000,"📅"],
+    [7,"1y diary classic · White","Diary","7nzli4iT","2560449651038",16000,"📅"],
+    [8,"1y diary classic · Wasabi","Diary","9t8Yyjqx","1516200861772",16000,"📅"],
+    [9,"1y diary classic · Grey","Diary","7oTqNoj5","7566365427611",16000,"📅"],
+    [10,"1y diary L_Soft Cover · Marsala","Diary","s5PkFzXC","8532152299821",32000,"📅"],
+    [11,"1y diary L_Soft Cover · Forest","Diary","PFRQdbxf","5679044812415",32000,"📅"],
+    [12,"1y diary L_Soft Cover · Silver","Diary","Orv7OAti","4516415643991",32000,"📅"],
+    [13,"1y diary P_Soft Cover · Lavender","Diary","UzFiEWmq","4787640055285",29000,"📅"],
+    [14,"1y diary P_Soft Cover · Honey","Diary","64fFDj7n","8799500167137",29000,"📅"],
+    [15,"1y diary P_Soft Cover · Deep Blue","Diary","pW94VL3t","4491743317136",29000,"📅"],
+    [16,"1y diary P_Soft Cover · Black","Diary","oRh1f40T","2064624619423",29000,"📅"],
+    [17,"1y diary P_Soft Cover · Red Twill","Diary","7QbGu7bZ","5565308167179",29000,"📅"],
+    [18,"1y diary P_Soft Cover · White","Diary","3aSIcPP9","4500223196184",29000,"📅"],
+    [19,"1/2y diary solid · Parsley","Diary","uwDaZltX","4294195938342",15000,"📅"],
+    [20,"1/2y diary solid · Lylac","Diary","Crr8ICgS","5101202890045",15000,"📅"],
+    [21,"1/2y diary solid · Orange","Diary","UTIsAl1U","7637944508611",15000,"📅"],
+    [22,"1/2y diary solid · Navy","Diary","yK0GEGHr","5318917385985",15000,"📅"],
+    [23,"1/2y diary photo · Parasol","Diary","j5D93CEN","4882675202647",15000,"📅"],
+    [24,"1/2y diary photo · Garden 02","Diary","Y0Ga5Q2I","2080941559054",15000,"📅"],
+    [25,"1/2y diary classic · Wasabi","Diary","b6jHpmCe","9002152691929",15000,"📅"],
+    [26,"1/2y diary classic · Red","Diary","9z19z5Bb","6309217619706",15000,"📅"],
+    [27,"1/4y diary solid · Sky","Diary","crUuycGq","4834372246400",12000,"📅"],
+    [28,"1/4y diary solid · Sea","Diary","QRyCIF3B","8033226502651",12000,"📅"],
+    [29,"1/4y diary solid · Grass","Diary","iwsPBP0A","6756185023475",12000,"📅"],
+    [30,"1/4y diary solid · Rose","Diary","2sonfqvy","7065986834470",12000,"📅"],
+    [31,"1/4y diary solid · Pure White","Diary","SjWVhHCp","9122275995362",12000,"📅"],
+    [32,"1/4y diary solid · Tabaco","Diary","0jXgvAho","4241426254599",12000,"📅"],
+    [33,"1/4y diary solid · Chili Red","Diary","4OYH0Uqn","1611738621201",12000,"📅"],
+    [34,"1/4y diary solid · Black","Diary","Et5tO6MA","7877300120955",12000,"📅"],
+    [35,"1/4y diary graphic · 1/4 Blue","Diary","H1IVo4lT","1146593020097",12000,"📅"],
+    [36,"1/4y diary graphic · 1/4 Green","Diary","Ciwpw5CH","6306911026386",12000,"📅"],
+    [37,"1/4y diary photo · Maki 01","Diary","xlIUJWDR","8707193336269",12000,"📅"],
+    [38,"1/4y diary photo · Apple 02","Diary","pEJdA2r2","3491044802642",12000,"📅"],
+    [39,"1/4y diary photo · Apple 01","Diary","SefL9QaJ","2810521053624",12000,"📅"],
+    [40,"1/4y diary photo · Comma 01","Diary","txXG8BTi","5597471928024",12000,"📅"],
+    [41,"1/4y diary photo · River 02","Diary","tEiB0kLf","9025829559864",12000,"📅"],
+    [42,"1/4y diary photo · Writer 01","Diary","S7ZkaXVw","6874777706168",12000,"📅"],
+    [43,"1/4y diary photo · Window 01","Diary","BYtQV0H4","8993856906062",12000,"📅"],
+    [44,"1/4y diary photo · Cup 02","Diary","LVfzhneI","2331148554202",12000,"📅"],
+    [45,"1/4y diary photo · Wating For You","Diary","vQT4CxDN","5612535634211",12000,"📅"],
+    [46,"1/4y diary photo · Friends 01","Diary","ullOS4ot","7560710230509",12000,"📅"],
+    [47,"1/4y diary photo · Beer 01","Diary","hMVEid1q","7092494864766",12000,"📅"],
+    [48,"1/4y diary photo · Vending Machine","Diary","aWuaW2yt","5223798124644",12000,"📅"],
+    [49,"1/4y diary photo · Park 05","Diary","1gPUlu08","8595230414617",12000,"📅"],
+    [50,"1/4y diary photo · Book 01","Diary","5jkwCFvB","9856402548875",12000,"📅"],
+    [51,"1/4y diary photo · Otter","Diary","kbyZ6knY","5406074573542",12000,"📅"],
+    [52,"1/4y diary photo · Holiday","Diary","yTUCPDw1","3064910200572",12000,"📅"],
+    [53,"1/4y diary photo · Blue Moon","Diary","OI0F105t","4105920962400",12000,"📅"],
+    [54,"1/4y diary photo · Jelly 01","Diary","1fhgnMYa","1635934731835",12000,"📅"],
+    [55,"1/4y diary photo · Cafe 02","Diary","7MzNHIGM","6300015147646",12000,"📅"],
+    [56,"Monthly+Weekly Solid · Flame","Diary","hV2WiByZ","5521676810173",12000,"📅"],
+    [57,"Monthly+Weekly Solid · Citron","Diary","L13mCzgA","1291649840801",12000,"📅"],
+    [58,"Monthly+Weekly Solid · Mint","Diary","nI89a0Ih","9729280172902",12000,"📅"],
+    [59,"Monthly+Weekly Solid · Vivid Pink","Diary","TGGzi4dK","2637438508667",12000,"📅"],
+    [60,"1 Month","Diary","CdSBTF21","7447387377976",11000,"📅"],
+    [61,"Hard Cover · plain - Black","Note","uiHWKc8w","5745980992233",35000,"📓"],
+    [62,"Hard Cover · plain - Red","Note","j4baoc9J","5694229357476",35000,"📓"],
+    [63,"Hard Cover · plain - Brown","Note","4OnzdNl1","6889527498206",35000,"📓"],
+    [64,"Hard Cover · plain - Wasabi","Note","zTHXSdPf","6504452929902",35000,"📓"],
+    [65,"Hard Cover · lined - Petrol","Note","w4PjPWuP","9454631068482",35000,"📓"],
+    [66,"Hard Cover · lined - White","Note","M9mSZeyI","9508812998016",35000,"📓"],
+    [67,"L_Soft Cover · plain - Red","Note","q1mN4PSU","4005189821828",32000,"📓"],
+    [68,"L_Soft Cover · plain - Wine","Note","Rn0rqZBX","4034135302658",32000,"📓"],
+    [69,"L_Soft Cover · plain - White","Note","u1uAijli","9633320662682",32000,"📓"],
+    [70,"L_Soft Cover · lined - Navy","Note","wXNQoWzO","1596769210699",32000,"📓"],
+    [71,"L_Soft Cover · lined - Wasabi","Note","18DljpJ9","9100044667247",32000,"📓"],
+    [72,"L_Soft Cover · grid - Black","Note","7mUN0n8P","3552830060659",32000,"📓"],
+    [73,"L_Soft Cover · grid - Gold","Note","8rmzvWRj","3564389504345",32000,"📓"],
+    [74,"P_Soft Cover · Plain - Suede Wine","Note","97WyNLg9","3732454656298",29000,"📓"],
+    [75,"P_Soft Cover · Plain - Suede Red","Note","UTDVP9PQ","8774908651924",29000,"📓"],
+    [76,"P_Soft Cover · Plain - Lavender","Note","tFAdjouA","1935362112311",29000,"📓"],
+    [77,"P_Soft Cover · Plain - Honey","Note","07cBPec7","7093194510206",29000,"📓"],
+    [78,"P_Soft Cover · Plain - Deep Blue","Note","etduSD56","8294504158147",29000,"📓"],
+    [79,"P_Soft Cover · Plain - White","Note","yNvnkpCK","4548076320565",29000,"📓"],
+    [80,"P_Soft Cover · Plain - Natural","Note","wX7w7nRQ","4790570892430",29000,"📓"],
+    [81,"P_Soft Cover · Plain - Pink","Note","f2XDrJMa","5617182204499",29000,"📓"],
+    [82,"P_Soft Cover · Lined - S.Midnight","Note","ASdz99ae","9966163359338",29000,"📓"],
+    [83,"P_Soft Cover · Lined - Forest","Note","6NFSbd2f","4481075596544",29000,"📓"],
+    [84,"P_Soft Cover · Grid - Baby Pink","Note","qxoAW9Hq","3084579482776",29000,"📓"],
+    [85,"P_Soft Cover · Grid - Sea Green","Note","qbKkOt8G","4524735126937",29000,"📓"],
+    [86,"Tomoeriver · Plain - Spiral White","Note","zwGGvehc","4071799665968",19000,"📓"],
+    [87,"Tomoeriver · Plain - Spiral Black","Note","mSvtzFtH","1770337224215",19000,"📓"],
+    [88,"Tomoeriver · Plain - A.White","Note","0Iopv0h6","6094457902475",19000,"📓"],
+    [89,"Tomoeriver · Plain - Ladybug","Note","NXHAofW7","7490134289955",19000,"📓"],
+    [90,"Tomoeriver · Plain - Red","Note","MVMDb658","3182741310225",19000,"📓"],
+    [91,"Tomoeriver · Plain - Turquoise","Note","kvqBmsd7","3582748650732",19000,"📓"],
+    [92,"Tomoeriver · Lined - Rasberry","Note","TAr3oKXC","6335049325408",19000,"📓"],
+    [93,"Tomoeriver · Lined - Dalmatian","Note","k1ND8heM","7202237369443",19000,"📓"],
+    [94,"Tomoeriver · Lined - Camel","Note","zNnV7cGS","9961146223884",19000,"📓"],
+    [95,"Tomoeriver · Dot Grid - Pumpkin","Note","pI6K8Wv1","7328049082915",19000,"📓"],
+    [96,"Tomoeriver · Dot Grid - Choco","Note","qffEZPTd","2900652817498",19000,"📓"],
+    [97,"240p graphic · Plain Rekko Original","Note","2aqQc7bV","9984302248310",18000,"📓"],
+    [98,"240p graphic · Plain - Rekko Bread","Note","5FnX26fU","7432990679524",18000,"📓"],
+    [99,"240p graphic · Plain - Piano Black","Note","Hc4TKbbg","6605710496800",18000,"📓"],
+    [100,"240p graphic · Plain - Piano Red","Note","avJd4Nl7","4159913926025",18000,"📓"],
+    [101,"240p graphic · Plain - Brown","Note","BscYUkq6","8643331215619",16000,"📓"],
+    [102,"240p graphic · Lined Strawberry bk","Note","PhRTT0Og","2483536104609",18000,"📓"],
+    [103,"240p graphic · Lined - SilSil","Note","ZE2XfiT9","5613086307227",18000,"📓"],
+    [104,"240p graphic · Lined Frame Lavender","Note","GeNNej9V","5489962874986",16000,"📓"],
+    [105,"240p graphic · Lined Frame 01 Black","Note","nmnpjD4O","5348067314991",16000,"📓"],
+    [106,"240p graphic · Grid Frame 01 Blue","Note","lXBstU0s","1015855026252",16000,"📓"],
+    [107,"240p graphic · Grid Frame 01 Red","Note","q4c4eUpE","5503857345781",16000,"📓"],
+    [108,"240p graphic · Grid Brick","Note","NEJK3A5T","5833576763545",16000,"📓"],
+    [109,"240p graphic · Grid Graph Lilac","Note","DUPwFkAZ","5841698156527",16000,"📓"],
+    [110,"240p graphic · Grid - Graph Parsley","Note","YRapz1De","1064241534461",16000,"📓"],
+    [111,"240p solid · Plain - Red","Note","JP1gIhrn","5893794467217",16000,"📓"],
+    [112,"240p solid · Plain - Pure White","Note","KkOuHn0k","5248384473402",16000,"📓"],
+    [113,"240p solid · Plain - Milk","Note","NEIvINrk","1943342864521",16000,"📓"],
+    [114,"128p graphic · Plain - A.White","Note","MVGqi513","9911907017833",12000,"📓"],
+    [115,"128p graphic · Plain Heart Flamingo","Note","biu9vGnX","5414838642002",12000,"📓"],
+    [116,"128p graphic · Plain - Wild Flower","Note","YDvRpA5r","1422583955756",12000,"📓"],
+    [117,"128p graphic · Plain Strawberry Red","Note","ElsxnXGZ","2069911480548",12000,"📓"],
+    [118,"128p graphic · Lined - Frame Lemom","Note","yTMJ2XFR","8837978397497",12000,"📓"],
+    [119,"128p graphic · Lined - Frame Red","Note","VkL6IiSd","4108460546861",12000,"📓"],
+    [120,"128p graphic · Lined - Frame Love","Note","sb93UJ1s","3359754165185",12000,"📓"],
+    [121,"128p graphic · Lined - Frame Forest","Note","yen9XUKH","3966986340517",12000,"📓"],
+    [122,"128p graphic · Grid - Graph Oyster","Note","AgKVaGfo","1265786264554",12000,"📓"],
+    [123,"128p graphic · Grid - Graph Sky","Note","96RWl2q9","7232749336672",12000,"📓"],
+    [124,"128p graphic · Grid - Graph Army.G","Note","1MAHxCFJ","1432403413723",12000,"📓"],
+    [125,"128p graphic · Grid - Graph A.White","Note","8NGwYf1m","2902218695853",12000,"📓"],
+    [126,"128p solid · plain - Lime","Note","EqmtUYHA","5207489441998",12000,"📓"],
+    [127,"128p solid · plain - Red Bean","Note","LubNivqA","6984593431901",12000,"📓"],
+    [128,"128p solid · plain - Paprika","Note","72ry6BQT","4669393391439",12000,"📓"],
+    [129,"128p solid · plain - Turquoise","Note","ueI8nZsa","7613424035675",12000,"📓"],
+    [130,"128p solid · lined - A.White","Note","bnHYyvq6","3511190857519",12000,"📓"],
+    [131,"128p solid · lined - Morning Blue","Note","Qg3cV6Zu","2464881949270",12000,"📓"],
+    [132,"128p solid · lined - Sage Green","Note","1kQzESgD","1854061541827",12000,"📓"],
+    [133,"128p solid · lined - Berry Pink","Note","7BIRw3xi","4037216939910",12000,"📓"],
+    [134,"128p solid · grid - Honey","Note","5lUsRF3Q","2877820166530",12000,"📓"],
+    [135,"128p solid · grid - Stone","Note","ii2jHpXf","4828008075144",12000,"📓"],
+    [136,"128p solid · grid - Grass","Note","zFxpbRl5","6246447530049",12000,"📓"],
+    [137,"128p solid · grid - Cloud Blue","Note","Q7v08ZQe","5408289036447",12000,"📓"],
+    [138,"Spiral B6 · plain Earth","Note","LmbYMKOz","6266434452801",12000,"📓"],
+    [139,"Spiral B6 · plain Green","Note","G0Ic2bmq","6237563611471",12000,"📓"],
+    [140,"Spiral B6 · plain Cloud Blue","Note","Qa0x9Nz5","2434780495966",12000,"📓"],
+    [141,"Spiral B6 · plain Red","Note","vGTmqlP9","2467093921281",12000,"📓"],
+    [142,"Spiral B6 · plain Olive","Note","x1qMYbmr","5468379126947",12000,"📓"],
+    [143,"Spiral B6 · plain Dazzling Blue","Note","m9uhGTqo","7337673923465",12000,"📓"],
+    [144,"Spiral B6 · plain Tomato","Note","EO7DRWOl","5063784174442",12000,"📓"],
+    [145,"Spiral B6 · lined Gold","Note","4K6xJuP6","3930365477318",12000,"📓"],
+    [146,"Spiral B6 · lined Pearl","Note","JmSoGS4Q","1309091088936",12000,"📓"],
+    [147,"Spiral B6 · grid Silver","Note","qUkKKPSo","1529286255233",12000,"📓"],
+    [148,"Spiral B6 · grid Red","Note","2rr3DsHe","5706751329375",12000,"📓"],
+    [149,"Spiral Handy · plain Earth","Note","alTftUfo","4725290083809",9000,"📓"],
+    [150,"Spiral Handy · lined Gold","Note","sZUun5Bj","3648012228462",9000,"📓"],
+    [151,"Spiral Handy · lined Pearl","Note","AMzhUkOr","9958503896285",9000,"📓"],
+    [152,"Spiral Handy · grid Silver","Note","qS760Hz9","7780444683591",9000,"📓"],
+    [153,"Spiral Handy · grid Red","Note","ZSKkmzQt","9156182961006",9000,"📓"],
+    [154,"Spiral A4 · Grey(A4)","Note","m3EAvcly","4638057813695",15000,"📓"],
+    [155,"Spiral A4 · Blue Bell(A4)","Note","6bHPe7nc","6558920493557",15000,"📓"],
+    [156,"Spiral A4 · Paprika(A4)","Note","xUw2GzNR","5444076703817",15000,"📓"],
+    [157,"Spiral A4 · Corn(A4)","Note","XSU18Oth","2596972489954",15000,"📓"],
+    [158,"64p graphic · W.Check LIst_Green","Note","49WO1JTM","3818429770463",6000,"📓"],
+    [159,"64p graphic · Frame_Red","Note","V2FNrqlK","5773045670051",6000,"📓"],
+    [160,"64p graphic · Frame_Blue","Note","WIZV6KRo","8010326540124",6000,"📓"],
+    [161,"64p graphic · Square_Red","Note","ogOFqQYj","9928513320074",6000,"📓"],
+    [162,"64p graphic · Square_Blue","Note","fRwbO749","2310270003393",6000,"📓"],
+    [163,"64p graphic · Grid_R&B","Note","MAunp1Dh","3815796735025",6000,"📓"],
+    [164,"64p graphic · Plain","Note","dXLdcq7k","4204922046837",6000,"📓"],
+    [165,"64p graphic · Cash Book","Note","rtgXlI7J","2651420477544",6000,"📓"],
+    [166,"64p graphic · W.Check LIst_Ladybug","Note","e9atcdOB","7854546938131",6000,"📓"],
+    [167,"64p graphic · Grid_Grass","Note","S2cE9xkg","5700859600577",6000,"📓"],
+    [168,"64p graphic · Weekly 01","Note","UPgrgYha","5843404391453",6000,"📓"],
+    [169,"64p graphic · Lined","Note","Nul4pOJk","6710871586009",6000,"📓"],
+    [170,"64p graphic · Check List 01","Note","3YgBPN5L","8564960992678",6000,"📓"],
+    [171,"64p graphic · Grid_Color 01","Note","YtZlhNx3","1791433665641",6000,"📓"],
+    [172,"64p graphic · Weekly 02","Note","tZP5TmiY","2448218805197",6000,"📓"],
+    [173,"64p handy Drawing · Watermelon","Note","flgrzacz","5450406415691",5000,"📓"],
+    [174,"64p handy Drawing · Rekko 01 (Original)","Note","cFpTs4s1","8702936569004",5000,"📓"],
+    [175,"64p handy Drawing · Cherry Tomato 01","Note","2nfEWhn4","7574940650464",5000,"📓"],
+    [176,"64p handy Drawing · Cherry Tomato 02","Note","Kzl6zNZp","1204658291763",5000,"📓"],
+    [177,"64p handy Drawing · Bird 01","Note","T11iwRkr","7118061446882",5000,"📓"],
+    [178,"64p handy Drawing · Hou","Note","7CxTJaCF","7883197740304",5000,"📓"],
+    [179,"64p handy Drawing · Rekko 01_Black","Note","BX8aGmgb","1672402637409",5000,"📓"],
+    [180,"64p handy Drawing · Rekko_Fish Bowl","Note","SVAq7nsM","4063962466762",5000,"📓"],
+    [181,"64p handy Drawing · Fruits Club","Note","4Vs6GX0y","9081311902318",5000,"📓"],
+    [182,"64p handy Drawing · Bagel 01","Note","zQmtclJz","5751311954086",5000,"📓"],
+    [183,"64p handy Drawing · Strawberry 01","Note","P7AstSLH","8857465118536",5000,"📓"],
+    [184,"64p handy Drawing · Zzaku","Note","wFTuhIMi","5873857595924",5000,"📓"],
+    [185,"64p handy Drawing · Apple Green","Note","DGtW8yj6","2414704709611",5000,"📓"],
+    [186,"64p handy Drawing · Sparrow","Note","lGqET9zT","7823077966489",5000,"📓"],
+    [187,"64p handy Photo · Sunny Side Up","Note","FEWe0j4u","1746851801577",5000,"📓"],
+    [188,"64p handy Photo · Pencil 01","Note","OAPVg3Wu","8334301793571",5000,"📓"],
+    [189,"64p handy Photo · Fruit Shop 01","Note","IOdKLC04","8304855537150",5000,"📓"],
+    [190,"64p handy Photo · Cup 03","Note","LLHXOcUC","4704958242485",5000,"📓"],
+    [191,"64p handy Photo · Color 01","Note","I919KLTX","5607695596509",5000,"📓"],
+    [192,"64p handy Photo · Park","Note","dTkPO9RS","6201229906503",5000,"📓"],
+    [193,"64p handy Photo · Love 01","Note","xBfoGk7H","6606245221465",5000,"📓"],
+    [194,"64p handy Photo · Maki 01","Note","Tvm8Udeo","5443763434308",5000,"📓"],
+    [195,"64p handy Photo · Apple 02","Note","4TRFiOTL","3571342816962",5000,"📓"],
+    [196,"64p handy Photo · Jelly 01","Note","x6qhvO5o","3016035875409",5000,"📓"],
+    [197,"64p handy Photo · Cup 02","Note","DhyWVLNr","5175053800700",5000,"📓"],
+    [198,"64p handy Photo · Coffee 01","Note","h603mk3z","4919587156780",5000,"📓"],
+    [199,"64p handy Photo · Friends 01","Note","ZwNWO5AU","5721519612273",5000,"📓"],
+    [200,"64p handy Photo · Beer 01","Note","lcoSyW8v","1167658282968",5000,"📓"],
+    [201,"64p handy Photo · Waiting For You","Note","VRMLITV3","7972247407520",5000,"📓"],
+    [202,"Grocery Bag Rekko · White","Bag","ZlvCh30Q","3615168728298",24000,"👜"],
+    [203,"Grocery Bag Rekko · Red","Bag","abLGiX3q","5302175453552",24000,"👜"],
+    [204,"Grocery Bag Rekko · Lemon","Bag","C8jYoCIv","2320350701635",24000,"👜"],
+    [205,"Grocery Bag Rekko · Marsala","Bag","UBKjfzDi","3353607096434",24000,"👜"],
+    [206,"Grocery Bag Rekko · Purple","Bag","BmZddqcr","2050732925942",24000,"👜"],
+    [207,"Grocery Bag Rekko · Coyote","Bag","59lIWFO3","3736032576776",24000,"👜"],
+    [208,"Grocery Bag Rekko · Blue","Bag","dPquiceX","6084712877092",24000,"👜"],
+    [209,"Grocery Bag Rekko · Red Bean","Bag","fyiTDaMe","1756891457108",24000,"👜"],
+    [210,"SilSil Go Undercover","Bag","mZIpGJSH","4151848411096",24000,"👜"],
+    [211,"Book Bag Rekko · White","Bag","GQLqygEu","9117368136079",21000,"👜"],
+    [212,"Book Bag Rekko · Red","Bag","ezsmLIkv","6963359167456",21000,"👜"],
+    [213,"Book Bag Rekko_Bread","Bag","JidKacyk","8572674375745",18000,"👜"],
+    [214,"2027 Calendar · color1","Paper Goods","BoEHlTxN","7621917454689",13000,"📄"],
+    [215,"2027 Calendar · color2","Paper Goods","eNrTdp5i","3063881703306",14000,"📄"],
+    [216,"Mini Calendar","Paper Goods","ctJAhCCE","1294481770436",2000,"📄"],
+    [217,"Air Ticket","Paper Goods","7hfs2j8r","4318303984766",2000,"📄"],
+    [218,"Postcard","Paper Goods","MhhqCZbX","2693994377043",1500,"📄"],
+    [219,"Postcard Set","Paper Goods","PRFNm2y8","9048170054703",4500,"📄"],
+    [220,"Envelope","Paper Goods","VYOtg3cb","2109245523717",1500,"📄"],
+    [221,"Allwrite Envelope Set","Paper Goods","4suHvVvT","8301813763951",4000,"📄"],
+    [222,"Poster · Poster_Rekko","Paper Goods","DcxCO3w9","3323524028095",9500,"📄"],
+    [223,"Poster · Photo","Paper Goods","95EQ1WhO","8221012942652",12000,"📄"],
+    [224,"Memo · Grid Paper","Paper Goods","l7F4tg2k","3658616553339",8900,"📄"],
+    [225,"Memo · Square Paper","Paper Goods","qh2bZbzk","5157561854731",8900,"📄"],
+    [226,"Memo · Weekly Planner","Paper Goods","IvMcbR91","1187093035789",8900,"📄"],
+    [227,"Airmail Memo · Original","Paper Goods","me1m2CFF","2102624953888",6900,"📄"],
+    [228,"Airmail Memo · Caramel Egg","Paper Goods","yl3L20p9","6524142221289",6900,"📄"],
+    [229,"Airmail Memo · Green","Paper Goods","8txmFmdz","5674964011811",6900,"📄"],
+    [230,"Checklist · Checklist","Paper Goods","5iC8LFqy","2752441634464",3500,"📄"],
+    [231,"Checklist · Half Grid","Paper Goods","HacRFABU","2682863375784",3500,"📄"],
+    [232,"Packging","Paper Goods","nKfnNI0K","9090075196356",700,"📄"],
+    [233,"12mm set","Masking Tape","67ChoA6T","1843361079445",6500,"🎀"],
+    [234,"12mm","Masking Tape","1WJKymvu","3461132761306",3500,"🎀"],
+    [235,"25mm","Masking Tape","3il3Oud1","5983884762419",6500,"🎀"],
+    [236,"PVC Cover","Other Goods","IYTXKtY0","6152009593338",1500,"📦"],
+    [237,"Maskig Tape Cutter","Other Goods","KggTAtKn","2191264143348",6900,"📦"],
+    [238,"Pen · Jetstrim 0.7","Other Goods","krnTjCkK","3356054514242",2000,"📦"],
+    [239,"Pen · Jetstrim 0.5","Other Goods","uIwBb9e1","3532302391592",2000,"📦"],
+    [240,"Pen · Uniball","Other Goods","n6raxfW6","2837775874274",1500,"📦"],
+    [241,"Pen · fx153","Other Goods","PWRYqAcY","1529168520365",1500,"📦"],
+    [242,"Leather Cover · Ocean","Leather Goods","Pldur7kH","3093422610112",55000,"🧳"],
+    [243,"Leather Cover · Camel","Leather Goods","OlSHGmH7","4792789210888",55000,"🧳"],
+    [244,"Leather Cover · Matte Black","Leather Goods","iSK7DcVz","9245297109187",55000,"🧳"],
+    [245,"Leather Cover · Dark Brown","Leather Goods","B8XLCxr9","7089564440545",55000,"🧳"],
+    [246,"Leather Cover · Gloss Black","Leather Goods","uVp5n0ws","1203094794215",55000,"🧳"],
+    [247,"Leather Cover · Olive","Leather Goods","LKLbrlN1","5405819742036",55000,"🧳"],
+    [248,"Leather Cover · Milk","Leather Goods","S57eXNZS","3787619511277",63000,"🧳"],
+    [249,"Leather Cover · Natural","Leather Goods","li4EIfpo","3483928749548",65000,"🧳"],
+    [250,"Leather Cover · Mexican Blue","Leather Goods","syIVAuzk","1029470788096",73000,"🧳"],
+    [251,"Leather Cover · B.Cherry Red","Leather Goods","qrELX6VX","8774946071253",115000,"🧳"],
+    [252,"Leather Cover · B.Piano Black","Leather Goods","61Y7WQ9I","9839771609188",115000,"🧳"],
+    [253,"Paybag","Leather Goods","1BJql6vs","8581338661594",149000,"🧳"]
+  ];
+  products = raw.map(r => ({
+    id:r[0], name:r[1], category:r[2], sku:r[3], barcode:r[4], price:r[5], emoji:r[6],
+    imgUrl:null, stock:[0,0,0,0], low:5
+  }));
+  renderAll();
+}
+
+// ── API ──────────────────────────────────────────────────
+async function api(body) {
+  if (isDemo) { toast('데모 모드 — URL 설정 후 실제 저장됩니다', 'warn'); return null; }
+  try {
+    const res = await fetch(SCRIPT_URL, { method:'POST', body: JSON.stringify(body) });
+    return await res.json();
+  } catch(e) { toast('서버 연결 실패', 'err'); return null; }
+}
+
+// ── 렌더링 ───────────────────────────────────────────────
+function renderAll() { renderSummary(); renderStock(); }
+
+function renderSummary() {
+  const BC_VALS = ['var(--c0)','var(--c1)','var(--c2)','var(--c3)'];
+  document.getElementById('summaryCards').innerHTML = BRANCHES.map((b,i) => {
+    const total = products.reduce((s,p) => s + p.stock[i], 0);
+    const low   = products.filter(p => p.stock[i] <= p.low && p.stock[i] >= 0).length;
+    return `<div class="sc" style="--bc:${BC_HEX[i]}">
+      <div class="sc-name"><span class="sc-dot"></span>${b}</div>
+      <div class="sc-num">${total.toLocaleString()}</div>
+      <div class="sc-sub">${products.length}종${low ? ` · <span style="color:#E24B4A;font-weight:600">부족 ${low}종</span>` : ''}</div>
+    </div>`;
+  }).join('');
+}
+
+function getFiltered() {
+  const q   = document.getElementById('searchInput').value.toLowerCase();
+  const cat = document.getElementById('catFilter').value;
+  return products.filter(p =>
+    (!q  || p.name.toLowerCase().includes(q) || (p.sku||'').toLowerCase().includes(q) || (p.barcode||'').includes(q)) &&
+    (!cat || p.category === cat)
+  );
+}
+
+function goPage(n) { curPage = n; }
+
+function renderStock() {
+  const filtered    = getFiltered();
+  const totalCount  = filtered.length;
+  const totalPages  = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
+  if (curPage > totalPages) curPage = totalPages;
+  const start = (curPage - 1) * PAGE_SIZE;
+  const page  = filtered.slice(start, start + PAGE_SIZE);
+  const el    = document.getElementById('productList');
+  const bar   = document.getElementById('pagiBar');
+
+  if (!page.length) {
+    el.innerHTML = '<div class="empty">검색 결과가 없습니다.</div>';
+    bar.style.display = 'none';
+    return;
+  }
+
+  const maxS = BRANCHES.map((_,i) => Math.max(...products.map(p => p.stock[i]), 1));
+
+  el.innerHTML = page.map(p => {
+    const thumb = p.imgUrl ? `<img src="${p.imgUrl}" alt="">` : `<span style="font-size:17px">${p.emoji}</span>`;
+    const cells = BRANCHES.map((_,i) => {
+      const s   = p.stock[i];
+      const pct = Math.min(100, Math.round(s / maxS[i] * 100));
+      const fc  = pct < 20 ? '#E24B4A' : pct < 40 ? '#EF9F27' : '#1D9E75';
+      return `<div class="td c">
+        <div class="scell">
+          <span class="snum" onclick="editStock(${p.id},${i},this)">${s}</span>
+          <div class="sbar"><div class="sbar-f" style="width:${pct}%;background:${fc}"></div></div>
+          ${s <= p.low ? '<span class="low-b">부족</span>' : ''}
+        </div>
+      </div>`;
+    }).join('');
+    return `<div class="prow" id="row-${p.id}">
+      <div class="td">
+        <div class="pinfo">
+          <div class="pthumb" onclick="openImgModal(${p.id})" title="이미지 변경">
+            ${thumb}<div class="ov"><i class="ti ti-camera"></i></div>
+          </div>
+          <div style="min-width:0">
+            <div class="pname" title="${p.name}">${p.name}</div>
+            <div class="pmeta">${p.sku}  ${p.barcode}</div>
+            <div class="pcat">${p.category} · ${p.price.toLocaleString()}원</div>
+          </div>
+        </div>
+      </div>
+      ${cells}
+      <div class="td c actcell">
+        <button class="ib" onclick="openQReceive(${p.id})" title="입고"><i class="ti ti-package-import"></i></button>
+        <button class="ib" onclick="openQTransfer(${p.id})" title="이동"><i class="ti ti-transfer"></i></button>
+        <button class="ib" onclick="delProduct(${p.id})" title="삭제"><i class="ti ti-trash"></i></button>
+      </div>
+    </div>`;
+  }).join('');
+
+  // 페이지네이션
+  bar.style.display = totalPages > 1 ? 'flex' : 'none';
+  if (totalPages > 1) {
+    const pages = [];
+    for (let i = 1; i <= totalPages; i++) {
+      if (i === 1 || i === totalPages || Math.abs(i - curPage) <= 2) pages.push(i);
+      else if (pages[pages.length-1] !== '…') pages.push('…');
+    }
+    bar.innerHTML = `
+      <span>${start+1}–${Math.min(start+PAGE_SIZE,totalCount)} / 총 ${totalCount}개</span>
+      <div class="pagi-btns">
+        <button class="pbtn" onclick="if(${curPage}>1){goPage(${curPage-1});renderStock()}" ${curPage===1?'disabled':''}>‹</button>
+        ${pages.map(p => p === '…'
+          ? `<span style="padding:3px 6px;color:var(--text2)">…</span>`
+          : `<button class="pbtn ${p===curPage?'on':''}" onclick="goPage(${p});renderStock()">${p}</button>`
+        ).join('')}
+        <button class="pbtn" onclick="if(${curPage}<${totalPages}){goPage(${curPage+1});renderStock()}" ${curPage===totalPages?'disabled':''}>›</button>
+      </div>`;
+  }
+}
+
+// ── 재고 직접 수정 ────────────────────────────────────────
+function editStock(pid, bi, el) {
+  const p = products.find(x => x.id === pid);
+  el.innerHTML = `<input class="snum-in" type="number" value="${p.stock[bi]}" min="0"
+    onblur="saveStock(${pid},${bi},this)" onkeydown="if(event.key==='Enter')this.blur()" autofocus>`;
+  el.querySelector('input').focus();
+}
+async function saveStock(pid, bi, input) {
+  const val = Math.max(0, parseInt(input.value) || 0);
+  const p   = products.find(x => x.id === pid);
+  const old = p.stock[bi];
+  p.stock[bi] = val;
+  renderAll();
+  if (val !== old) {
+    await api({ action:'updateStock', productId:pid, branchIndex:bi, value:val });
+    addLocalLog('edit', p.name, `${BRANCHES[bi]} 재고 수정 ${old}→${val}개`, '');
+    toast(`${BRANCHES[bi]} 재고 수정 완료`, 'success');
+  }
+}
+
+// ── 입고 ─────────────────────────────────────────────────
+function updateRPrev() {
+  const sel = document.getElementById('rProduct');
+  if (!sel || !products.length) return;
+  const p   = products.find(x => x.id === parseInt(sel.value));
+  if (!p) return;
+  const bi  = parseInt(document.getElementById('rBranch').value);
+  const qty = parseInt(document.getElementById('rQty').value) || 0;
+  document.getElementById('rCur').textContent = `현재 ${BRANCHES[bi]}: ${p.stock[bi]}개`;
+  const prev = document.getElementById('rPrev');
+  if (qty <= 0) { prev.classList.remove('show'); return; }
+  prev.classList.add('show');
+  document.getElementById('rPrevBody').innerHTML =
+    `<div style="display:flex;justify-content:space-between"><span>입고 후 <strong>${BRANCHES[bi]}</strong></span><span><strong>${p.stock[bi]}→${p.stock[bi]+qty}개</strong> (+${qty})</span></div>`;
+}
+async function processReceive() {
+  if (!products.length) { alert('상품이 없습니다.'); return; }
+  const p   = products.find(x => x.id === parseInt(document.getElementById('rProduct').value));
+  const bi  = parseInt(document.getElementById('rBranch').value);
+  const qty = parseInt(document.getElementById('rQty').value) || 0;
+  const memo = document.getElementById('rMemo').value;
+  if (qty <= 0) { alert('수량을 입력하세요.'); return; }
+  const before = p.stock[bi];
+  p.stock[bi] += qty;
+  renderAll();
+  addLocalLog('receive', p.name, `${BRANCHES[bi]} 입고 +${qty}개 (${before}→${p.stock[bi]})`, memo);
+  document.getElementById('rQty').value = '10';
+  document.getElementById('rMemo').value = '';
+  updateRPrev();
+  toast(`입고 완료 — ${BRANCHES[bi]} +${qty}개`, 'success');
+  await api({ action:'receiveStock', productId:p.id, productName:p.name, branchIndex:bi, qty, memo });
+}
+
+// ── 이동 ─────────────────────────────────────────────────
+function updateTPrev() {
+  const sel = document.getElementById('tProduct');
+  if (!sel || !products.length) return;
+  const p    = products.find(x => x.id === parseInt(sel.value));
+  if (!p) return;
+  const from = parseInt(document.getElementById('tFrom').value);
+  const to   = parseInt(document.getElementById('tTo').value);
+  const qty  = parseInt(document.getElementById('tQty').value) || 0;
+  const prev = document.getElementById('tPrev');
+  if (from === to) { prev.className = 'prev-txt err'; prev.textContent = '출발·도착 지점이 같습니다.'; return; }
+  if (qty > p.stock[from]) { prev.className = 'prev-txt err'; prev.textContent = `재고 부족 (현재 ${p.stock[from]}개)`; return; }
+  prev.className = 'prev-txt';
+  prev.textContent = `${BRANCHES[from]}: ${p.stock[from]}→${p.stock[from]-qty} / ${BRANCHES[to]}: ${p.stock[to]}→${p.stock[to]+qty}`;
+}
+async function processTransfer() {
+  if (!products.length) { alert('상품이 없습니다.'); return; }
+  const p    = products.find(x => x.id === parseInt(document.getElementById('tProduct').value));
+  const from = parseInt(document.getElementById('tFrom').value);
+  const to   = parseInt(document.getElementById('tTo').value);
+  const qty  = parseInt(document.getElementById('tQty').value) || 0;
+  const memo = document.getElementById('tMemo').value;
+  if (from === to) { alert('지점이 같습니다.'); return; }
+  if (qty <= 0)    { alert('수량을 입력하세요.'); return; }
+  if (qty > p.stock[from]) { alert('재고가 부족합니다.'); return; }
+  p.stock[from] -= qty; p.stock[to] += qty;
+  renderAll();
+  addLocalLog('transfer', p.name, `${BRANCHES[from]} → ${BRANCHES[to]} ${qty}개`, memo);
+  document.getElementById('tQty').value = '1';
+  document.getElementById('tMemo').value = '';
+  updateTPrev();
+  toast(`이동 완료 — ${BRANCHES[from]} → ${BRANCHES[to]} ${qty}개`, 'success');
+  await api({ action:'transferStock', productId:p.id, productName:p.name, fromIndex:from, toIndex:to, qty, memo });
+}
+
+// ── 빠른 입고 모달 ────────────────────────────────────────
+function openQReceive(pid) {
+  const p = products.find(x => x.id === pid);
+  setModal(`
+    <h3><i class="ti ti-package-import" style="vertical-align:-2px;margin-right:6px"></i>입고 처리</h3>
+    <p class="msub">${p.name}</p>
+    <label class="fl" style="margin-top:0">입고 지점</label>
+    <select id="qrBranch" class="fi" onchange="updateQrP(${pid})">
+      ${BRANCHES.map((b,i) => `<option value="${i}">${b} (현재 ${p.stock[i]}개)</option>`).join('')}
+    </select>
+    <label class="fl">입고 수량</label>
+    <input id="qrQty" type="number" value="10" min="1" class="fi" style="width:120px" oninput="updateQrP(${pid})">
+    <div class="rprev show" id="qrPrev"><div id="qrPrevBody"></div></div>
+    <label class="fl">메모 (선택)</label>
+    <input id="qrMemo" type="text" class="fi" placeholder="납품처, 발주번호...">
+    <div class="mrow">
+      <button class="sec-btn" onclick="closeModal()">취소</button>
+      <button class="btn primary" onclick="doQReceive(${pid})" style="justify-content:center;"><i class="ti ti-package-import"></i> 입고</button>
+    </div>`);
+  updateQrP(pid);
+}
+function updateQrP(pid) {
+  const p   = products.find(x => x.id === pid);
+  const bi  = parseInt(document.getElementById('qrBranch').value);
+  const qty = parseInt(document.getElementById('qrQty').value) || 0;
+  document.getElementById('qrPrevBody').innerHTML =
+    `<div style="display:flex;justify-content:space-between"><span>${BRANCHES[bi]} 입고 후</span><span><strong>${p.stock[bi]}→${p.stock[bi]+qty}개</strong> (+${qty})</span></div>`;
+}
+async function doQReceive(pid) {
+  const p   = products.find(x => x.id === pid);
+  const bi  = parseInt(document.getElementById('qrBranch').value);
+  const qty = parseInt(document.getElementById('qrQty').value) || 0;
+  const memo = document.getElementById('qrMemo').value;
+  if (qty <= 0) { alert('수량을 입력하세요.'); return; }
+  const before = p.stock[bi]; p.stock[bi] += qty;
+  addLocalLog('receive', p.name, `${BRANCHES[bi]} 입고 +${qty}개 (${before}→${p.stock[bi]})`, memo);
+  closeModal(); renderAll();
+  toast(`입고 완료 — ${BRANCHES[bi]} +${qty}개`, 'success');
+  await api({ action:'receiveStock', productId:pid, productName:p.name, branchIndex:bi, qty, memo });
+}
+
+// ── 빠른 이동 모달 ────────────────────────────────────────
+function openQTransfer(pid) {
+  const p = products.find(x => x.id === pid);
+  setModal(`
+    <h3><i class="ti ti-transfer" style="vertical-align:-2px;margin-right:6px"></i>재고 이동</h3>
+    <p class="msub">${p.name}</p>
+    <div style="display:flex;align-items:flex-end;gap:8px;">
+      <div style="flex:1"><label class="fl" style="margin-top:0">출발</label>
+        <select id="qtFrom" class="fi" onchange="updateQtP(${pid})">
+          ${BRANCHES.map((b,i) => `<option value="${i}">${b} (${p.stock[i]}개)</option>`).join('')}
+        </select>
+      </div>
+      <i class="ti ti-arrow-right arr"></i>
+      <div style="flex:1"><label class="fl" style="margin-top:0">도착</label>
+        <select id="qtTo" class="fi" onchange="updateQtP(${pid})">
+          ${BRANCHES.map((b,i) => `<option value="${i}" ${i===1?'selected':''}>${b} (${p.stock[i]}개)</option>`).join('')}
+        </select>
+      </div>
+    </div>
+    <label class="fl">수량</label>
+    <input id="qtQty" type="number" value="1" min="1" class="fi" style="width:100px" oninput="updateQtP(${pid})">
+    <p class="prev-txt" id="qtPrev" style="margin-top:6px;"></p>
+    <label class="fl">메모 (선택)</label>
+    <input id="qtMemo" type="text" class="fi" placeholder="이동 사유...">
+    <div class="mrow">
+      <button class="sec-btn" onclick="closeModal()">취소</button>
+      <button class="btn primary" onclick="doQTransfer(${pid})" style="justify-content:center;"><i class="ti ti-transfer"></i> 이동</button>
+    </div>`);
+  updateQtP(pid);
+}
+function updateQtP(pid) {
+  const p    = products.find(x => x.id === pid);
+  const from = parseInt(document.getElementById('qtFrom').value);
+  const to   = parseInt(document.getElementById('qtTo').value);
+  const qty  = parseInt(document.getElementById('qtQty').value) || 0;
+  const prev = document.getElementById('qtPrev');
+  if (from === to) { prev.className = 'prev-txt err'; prev.textContent = '지점이 같습니다.'; return; }
+  if (qty > p.stock[from]) { prev.className = 'prev-txt err'; prev.textContent = `재고 부족 (현재 ${p.stock[from]}개)`; return; }
+  prev.className = 'prev-txt';
+  prev.textContent = `${BRANCHES[from]}: ${p.stock[from]}→${p.stock[from]-qty} / ${BRANCHES[to]}: ${p.stock[to]}→${p.stock[to]+qty}`;
+}
+async function doQTransfer(pid) {
+  const p    = products.find(x => x.id === pid);
+  const from = parseInt(document.getElementById('qtFrom').value);
+  const to   = parseInt(document.getElementById('qtTo').value);
+  const qty  = parseInt(document.getElementById('qtQty').value) || 0;
+  const memo = document.getElementById('qtMemo').value;
+  if (from === to) { alert('지점이 같습니다.'); return; }
+  if (qty <= 0)    { alert('수량을 입력하세요.'); return; }
+  if (qty > p.stock[from]) { alert('재고가 부족합니다.'); return; }
+  p.stock[from] -= qty; p.stock[to] += qty;
+  addLocalLog('transfer', p.name, `${BRANCHES[from]} → ${BRANCHES[to]} ${qty}개`, memo);
+  closeModal(); renderAll();
+  toast(`이동 완료 — ${BRANCHES[from]} → ${BRANCHES[to]} ${qty}개`, 'success');
+  await api({ action:'transferStock', productId:pid, productName:p.name, fromIndex:from, toIndex:to, qty, memo });
+}
+
+// ── 상품 추가 ─────────────────────────────────────────────
+function openAddModal() {
+  setModal(`
+    <h3><i class="ti ti-package" style="vertical-align:-2px;margin-right:6px"></i>상품 추가</h3>
+    <label class="fl" style="margin-top:0">상품명</label>
+    <input id="nName" class="fi" placeholder="예: A5 Plain Notebook">
+    <label class="fl">카테고리</label>
+    <select id="nCat" class="fi">${CATS.map(c => `<option>${c}</option>`).join('')}</select>
+    <label class="fl">SKU</label>
+    <input id="nSku" class="fi" placeholder="예: NT-001">
+    <label class="fl">바코드</label>
+    <input id="nBarcode" class="fi" placeholder="13자리 바코드">
+    <label class="fl">이모지</label>
+    <input id="nEmoji" class="fi" value="📦" style="width:70px;font-size:18px;text-align:center;">
+    <label class="fl">부족 기준 수량</label>
+    <input id="nLow" type="number" class="fi" value="5" style="width:80px">
+    <label class="fl">초기 재고</label>
+    <div class="g4">
+      ${BRANCHES.map((b,i) => `<div><label style="color:${BC_HEX[i]}">${b}</label><input class="nstock" type="number" value="0" min="0"></div>`).join('')}
+    </div>
+    <div class="mrow">
+      <button class="sec-btn" onclick="closeModal()">취소</button>
+      <button class="btn primary" onclick="addProduct()" style="justify-content:center;"><i class="ti ti-plus"></i> 추가</button>
+    </div>`);
+}
+async function addProduct() {
+  const name = document.getElementById('nName').value.trim();
+  if (!name) { alert('상품명을 입력하세요.'); return; }
+  const cat     = document.getElementById('nCat').value;
+  const stock   = [...document.querySelectorAll('.nstock')].map(i => parseInt(i.value) || 0);
+  const newProd = {
+    id: Math.max(0, ...products.map(p => p.id)) + 1,
+    name, category:cat,
+    sku:     document.getElementById('nSku').value,
+    barcode: document.getElementById('nBarcode').value,
+    price:   0,
+    emoji:   document.getElementById('nEmoji').value || CAT_EMOJI[cat] || '📦',
+    imgUrl:  null, stock,
+    low:     parseInt(document.getElementById('nLow').value) || 5
+  };
+  products.push(newProd);
+  closeModal(); renderAll();
+  toast('상품 추가 완료', 'success');
+  const res = await api({ action:'addProduct', name:newProd.name, category:newProd.category, sku:newProd.sku, barcode:newProd.barcode, emoji:newProd.emoji, low:newProd.low, stock });
+  if (res && res.newId) newProd.id = res.newId;
+}
+async function delProduct(pid) {
+  if (!confirm('삭제할까요?')) return;
+  products = products.filter(p => p.id !== pid);
+  renderAll();
+  await api({ action:'deleteProduct', productId:pid });
+  toast('삭제 완료', 'success');
+}
+
+// ── 이미지 모달 ───────────────────────────────────────────
+function openImgModal(pid) {
+  const p = products.find(x => x.id === pid);
+  window._imgPid = pid;
+  window._pendingImg = undefined;
+  setModal(`
+    <h3><i class="ti ti-photo" style="vertical-align:-2px;margin-right:6px"></i>상품 이미지</h3>
+    <p class="msub" style="font-size:12px">${p.name}</p>
+    <div class="img-tabs">
+      <button class="img-tab active" id="itU" onclick="swImgTab('upload')"><i class="ti ti-upload" style="margin-right:4px"></i>이미지</button>
+      <button class="img-tab" id="itE" onclick="swImgTab('emoji')"><i class="ti ti-mood-smile" style="margin-right:4px"></i>이모지</button>
+    </div>
+    <div id="ipUpload">
+      <div class="dropzone" id="dz" ondragover="event.preventDefault()" ondrop="handleImgDrop(event)">
+        <input type="file" accept="image/*" onchange="handleImgFile(this)">
+        ${p.imgUrl
+          ? `<div class="dz-pw"><img src="${p.imgUrl}" alt=""><button class="rm" onclick="rmImg()" aria-label="제거"><i class="ti ti-x"></i></button></div>`
+          : `<div class="dz-ph"><i class="ti ti-photo-up"></i><span>클릭하거나 드래그</span><span style="font-size:11px;color:var(--text2)">PNG · JPG · WEBP · GIF</span></div>`
+        }
+      </div>
+    </div>
+    <div id="ipEmoji" style="display:none">
+      <label class="fl" style="margin-top:0">이모지</label>
+      <input id="emojiIn" class="fi" value="${p.emoji || '📦'}" style="font-size:20px;width:80px;text-align:center;">
+    </div>
+    <div class="mrow">
+      <button class="sec-btn" onclick="closeModal()">취소</button>
+      <button class="btn primary" onclick="saveImg()" style="justify-content:center;">저장</button>
+    </div>`);
+}
+function swImgTab(t) {
+  document.getElementById('itU').classList.toggle('active', t==='upload');
+  document.getElementById('itE').classList.toggle('active', t==='emoji');
+  document.getElementById('ipUpload').style.display = t==='upload' ? 'block' : 'none';
+  document.getElementById('ipEmoji').style.display  = t==='emoji'  ? 'block' : 'none';
+}
+function handleImgFile(input) { const f = input.files[0]; if (f) readImg(f); }
+function handleImgDrop(e) { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f && f.type.startsWith('image/')) readImg(f); }
+function readImg(file) {
+  const r = new FileReader();
+  r.onload = ev => {
+    window._pendingImg = ev.target.result;
+    document.getElementById('dz').innerHTML =
+      `<input type="file" accept="image/*" onchange="handleImgFile(this)">
+       <div class="dz-pw"><img src="${ev.target.result}" alt=""><button class="rm" onclick="rmImg()" aria-label="제거"><i class="ti ti-x"></i></button></div>`;
+  };
+  r.readAsDataURL(file);
+}
+function rmImg() {
+  window._pendingImg = null;
+  document.getElementById('dz').innerHTML =
+    `<input type="file" accept="image/*" onchange="handleImgFile(this)">
+     <div class="dz-ph"><i class="ti ti-photo-up"></i><span>클릭하거나 드래그</span></div>`;
+}
+function saveImg() {
+  const p = products.find(x => x.id === window._imgPid);
+  if (document.getElementById('ipEmoji').style.display !== 'none') {
+    p.emoji = document.getElementById('emojiIn').value || '📦';
+    p.imgUrl = null;
+  } else if (window._pendingImg !== undefined) {
+    p.imgUrl = window._pendingImg || null;
+  }
+  window._pendingImg = undefined;
+  closeModal(); renderAll();
+  toast('이미지 저장 완료', 'success');
+}
+
+// ── 탭 전환 ───────────────────────────────────────────────
+function switchTab(tab, btn) {
+  curTab = tab;
+  ['stock','receive','transfer','log'].forEach(t =>
+    document.getElementById('tab-' + t).style.display = t === tab ? 'block' : 'none'
+  );
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  if (tab === 'receive' || tab === 'transfer') populateSelects();
+  if (tab === 'log') loadLogs();
+}
+
+function populateSelects() {
+  ['rProduct','tProduct'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = products.map(p => `<option value="${p.id}">${p.name} (${p.sku})</option>`).join('');
+  });
+  updateRPrev(); updateTPrev();
+}
+
+// ── 이력 ─────────────────────────────────────────────────
+function addLocalLog(type, product, desc, memo) {
+  const time = new Date().toLocaleString('ko-KR', { month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' });
+  logs.unshift({ type, product, desc, memo, time });
+}
+async function loadLogs() {
+  const el = document.getElementById('logList');
+  if (isDemo) {
+    if (!logs.length) { el.innerHTML = '<div class="empty">이력이 없습니다.</div>'; return; }
+    renderLogsLocal();
+    return;
+  }
+  el.innerHTML = '<div class="loading"><div class="spinner"></div> 불러오는 중...</div>';
+  try {
+    const res  = await fetch(SCRIPT_URL + '?action=getLogs');
+    const data = await res.json();
+    if (data.ok && data.logs.length) {
+      el.innerHTML = data.logs.map(l => logItemHtml(l.type, l.productName || l.product, logDesc(l), l.memo, l.timestamp || '')).join('');
+    } else {
